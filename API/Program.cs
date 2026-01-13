@@ -1,6 +1,7 @@
 using System.Text;
 using API.Data;
 using API.Interfaces;
+using API.Middleware;
 using API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +18,7 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 });
 
 // to solve CORS issues
-builder.Services.AddCors(); 
+builder.Services.AddCors();
 // “When someone asks for ITokenService, create a TokenService instance using this lifetime rule.”
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
@@ -27,7 +28,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
   {
     // specify how we want to validate the token
     ValidateIssuerSigningKey = true, // this token is valid while api receives it
-    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKey)), 
+    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKey)),
     ValidateIssuer = false, // ValidateIssuer: does not accept tokens issued by certain issuer
     ValidateAudience = false // ValidateAudience: specify who is the audience of the token
   };
@@ -36,11 +37,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+
+// error-handle middleware - must be placed at the top to catch errors from all other middlewares
+app.UseMiddleware<ExceptionMiddleware>();
+
+// CORS policy
 app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200", "https://localhost:4200"));
 
-// who are you
-app.UseAuthentication(); 
-// are they allowedc
+// Authentication: who are you
+app.UseAuthentication();
+// Authorization: are they allowed
 app.UseAuthorization();
 
 app.MapControllers();
