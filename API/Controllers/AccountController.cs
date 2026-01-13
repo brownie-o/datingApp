@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers;
 
-public class AccountController(AppDbContext context, ITokenService tokenService) : BaseApiControlller
+public class AccountController(AppDbContext context, ITokenService tokenService) : BaseApiController
 {
   [HttpPost("register")] // api/account/register
 
