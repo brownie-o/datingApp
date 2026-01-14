@@ -3,6 +3,7 @@ using API.Data;
 using API.Interfaces;
 using API.Middleware;
 using API.Services;
+using Company.ClassLibrary1;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -21,6 +22,7 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 builder.Services.AddCors();
 // “When someone asks for ITokenService, create a TokenService instance using this lifetime rule.”
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
   var tokenKey = builder.Configuration["TokenKey"] ?? throw new Exception("TokenKey not found - Program.cs");
@@ -50,5 +52,20 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// seed data into datatbase
+using var scpoe = app.Services.CreateScope();
+var services = scpoe.ServiceProvider;
+try
+{
+  var context = services.GetRequiredService<AppDbContext>(); // get the database context
+  await context.Database.MigrateAsync(); // apply any pending migrations
+  await Seed.SeedUsers(context); // since we used static in Seed.cs, we can call SeedUsers directly
+}
+catch (Exception ex)
+{
+  var logger = services.GetRequiredService<ILogger<Program>>();
+  logger.LogError(ex, "An error occurred during migration");
+}
 
 app.Run();

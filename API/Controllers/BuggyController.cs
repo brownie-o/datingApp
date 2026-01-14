@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+// : = class inheritance
+//  : BaseApiController = BuggyController inherits from the BaseApiController class
 public class BuggyController : BaseApiController
 {
   [HttpGet("auth")]
