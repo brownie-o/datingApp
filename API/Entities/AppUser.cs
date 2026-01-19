@@ -1,5 +1,7 @@
 namespace API.Entities;
 
+// Database Model, represents the Users table in database
+// Should never be sent directly to the frontend, currently sending UserDto (in AppUserExtensions) instead
 public class AppUser
 {
   public string Id { get; set; } = Guid.NewGuid().ToString();
