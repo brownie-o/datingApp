@@ -13,6 +13,12 @@ public class MemberRepository(AppDbContext context) : IMemberRepository
     return await context.Members.FindAsync(id);
   }
 
+  // will include the User object when getting the member for update
+  public async Task<Member?> GetMemberForUpdate(string id)
+  {
+    return await context.Members.Include(x => x.User).SingleOrDefaultAsync(x => x.Id == id);
+  }
+
   public async Task<IReadOnlyList<Member>> GetMembersAsync()
   {
     return await context.Members
@@ -22,7 +28,7 @@ public class MemberRepository(AppDbContext context) : IMemberRepository
 
   public async Task<IReadOnlyList<Photo>> GetPhotosForMemberAsync(string memberId)
   {
-    return await context.Members.Where(x => x.Id == memberId).SelectMany(x => x.Photos).ToListAsync(); 
+    return await context.Members.Where(x => x.Id == memberId).SelectMany(x => x.Photos).ToListAsync();
     // return a readonly list of photos for a specific member
   }
 
@@ -32,7 +38,7 @@ public class MemberRepository(AppDbContext context) : IMemberRepository
     // The task result contains the number of state entries written to the database.
   }
 
-// use this method to save the same thing to the database
+  // use this method to save the same thing to the database
   public void Update(Member member)
   {
     // updating the tracking of the entity to say something has been modified

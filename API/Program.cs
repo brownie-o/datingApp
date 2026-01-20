@@ -23,6 +23,7 @@ builder.Services.AddCors();
 // “When someone asks for ITokenService, create a TokenService instance using this lifetime rule.”
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IMemberRepository, MemberRepository>();
+// Looks for Authorization header, Checks Bearer <token>
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
   var tokenKey = builder.Configuration["TokenKey"] ?? throw new Exception("TokenKey not found - Program.cs");
@@ -47,7 +48,7 @@ app.UseMiddleware<ExceptionMiddleware>();
 app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200", "https://localhost:4200"));
 
 // Authentication: who are you
-app.UseAuthentication();
+app.UseAuthentication(); // => create User object on the HttpContext, ControllerBase can use it
 // Authorization: are they allowed
 app.UseAuthorization();
 
