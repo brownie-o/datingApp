@@ -13,10 +13,11 @@ public class MemberRepository(AppDbContext context) : IMemberRepository
     return await context.Members.FindAsync(id);
   }
 
-  // will include the User object when getting the member for update
   public async Task<Member?> GetMemberForUpdate(string id)
   {
-    return await context.Members.Include(x => x.User).SingleOrDefaultAsync(x => x.Id == id);
+    // Include: eager loading related entities
+    // will include the User object & photos when getting the member for update
+    return await context.Members.Include(x => x.User).Include(x => x.Photos).SingleOrDefaultAsync(x => x.Id == id);
   }
 
   public async Task<IReadOnlyList<Member>> GetMembersAsync()
@@ -34,6 +35,7 @@ public class MemberRepository(AppDbContext context) : IMemberRepository
 
   public async Task<bool> SaveAllAsync()
   {
+    // SaveChangesAsync(): Saves all changes made in this context to the database.
     return await context.SaveChangesAsync() > 0;
     // The task result contains the number of state entries written to the database.
   }

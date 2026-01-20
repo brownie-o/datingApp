@@ -1,5 +1,6 @@
 using System.Text;
 using API.Data;
+using API.Helpers;
 using API.Interfaces;
 using API.Middleware;
 using API.Services;
@@ -20,9 +21,12 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 
 // to solve CORS issues
 builder.Services.AddCors();
-// “When someone asks for ITokenService, create a TokenService instance using this lifetime rule.”
+// “ When someone asks for ITokenService, create a TokenService instance using this lifetime rule. ”
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IPhotoService, PhotoService>();
 builder.Services.AddScoped<IMemberRepository, MemberRepository>();
+// builder.Configuration.GetSection("CloudinarySettings"): get the CloudinarySettings section from appsettings.json
+builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 // Looks for Authorization header, Checks Bearer <token>
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
