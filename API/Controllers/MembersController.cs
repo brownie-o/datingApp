@@ -2,6 +2,7 @@ using System.Security.Claims;
 using API.DTOs;
 using API.Entities;
 using API.Extensions;
+using API.Helpers;
 using API.Interfaces;
 using Company.ClassLibrary1;
 using Microsoft.AspNetCore.Authorization;
@@ -14,9 +15,14 @@ namespace API.Controllers
     {
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<Member>>> GetMembers()
+        // since pagingParams is an object, we need to tell the API controller to get it from the query string using [FromQuery]
+        public async Task<ActionResult<IReadOnlyList<Member>>> GetMembers([FromQuery] MemberParams memberParams)
         {
-            return Ok(await memberRepository.GetMembersAsync());
+
+            // get the current member id from the token claims and set it in the memberParams to exclude the current member from the results
+            memberParams.CurrentMemberId = User.GetMemberId();
+
+            return Ok(await memberRepository.GetMembersAsync(memberParams));
         }
 
         [HttpGet("{id}")] // localhost:5000/api/members/bob-id

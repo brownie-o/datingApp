@@ -1,5 +1,6 @@
 using System;
 using API.Entities;
+using API.Helpers;
 using Company.ClassLibrary1;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,11 +21,37 @@ public class MemberRepository(AppDbContext context) : IMemberRepository
     return await context.Members.Include(x => x.User).Include(x => x.Photos).SingleOrDefaultAsync(x => x.Id == id);
   }
 
-  public async Task<IReadOnlyList<Member>> GetMembersAsync()
+  public async Task<PaginatedResult<Member>> GetMembersAsync(MemberParams memberParams)
   {
-    return await context.Members
-    // .Include(x => x.Photos) // if eager loading photos along with members
-    .ToListAsync();
+    // AsQueryable(): set query as queryable to allow further querying
+    var query = context.Members.AsQueryable();
+
+    // exclude the current member from the results
+    query = query.Where(x => x.Id != memberParams.CurrentMemberId);
+
+    if (memberParams.Gender != null)
+    {
+      query = query.Where(x => x.Gender == memberParams.Gender);
+    }
+
+    var minDob = DateOnly.FromDateTime(DateTime.Today.AddYears(-memberParams.MaxAge - 1));
+    var maxDob = DateOnly.FromDateTime(DateTime.Today.AddYears(-memberParams.MinAge));
+
+    query = query.Where(x => x.DateOfBirth >= minDob && x.DateOfBirth <= maxDob);
+
+    // 排列
+    query = memberParams.OrderBy switch
+    {
+      "created" => query.OrderByDescending(x => x.Created),
+      // _: default case, if OrderBy is not "created", order by lastActive
+      _ => query.OrderByDescending(x => x.LastActive)
+    };
+
+    return await PaginationHelper.CreateAsync(query, memberParams.PageNumber, memberParams.PageSize);
+
+    // return await context.Members
+    //   .Include(x => x.Photos) // if eager loading photos along with members
+    //   .ToListAsync();
   }
 
   public async Task<IReadOnlyList<Photo>> GetPhotosForMemberAsync(string memberId)

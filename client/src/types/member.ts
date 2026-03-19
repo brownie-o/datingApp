@@ -24,3 +24,13 @@ export type EditableMember = {
   city: string
   country: string
 }
+
+// class allows us to create initial values in it
+export class MemberParams {
+  gender?: string;
+  minAge= 18;
+  maxAge= 100;
+  pageNumber= 1;
+  pageSize= 10;
+  orderBy= 'lastActive';
+}
