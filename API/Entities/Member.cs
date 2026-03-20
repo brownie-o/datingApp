@@ -23,11 +23,13 @@ public class Member
   [JsonIgnore]
   public List<Photo> Photos { get; set; } = [];
 
-[JsonIgnore]
+  [JsonIgnore]
   public List<MemberLike> LikedByMembers { get; set; } = [];
-  
-[JsonIgnore]
+
+  [JsonIgnore]
   public List<MemberLike> LikedMembers { get; set; } = [];
+  public List<Message> MessagesSent { get; set; } = [];
+  public List<Message> MessagesReceived { get; set; } = [];
 
   // The User navigation property (the AppUser object) is related to this Member through the Id foreign key
   // The Member.Id references AppUser.Id (establishes the relationship)
