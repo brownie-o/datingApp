@@ -1,11 +1,13 @@
 using System.Text;
 using API.Data;
+using API.Entities;
 using API.Helpers;
 using API.Interfaces;
 using API.Middleware;
 using API.Services;
 using Company.ClassLibrary1;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -30,6 +32,14 @@ builder.Services.AddScoped<ILikesRepository, LikesRepository>();
 builder.Services.AddScoped<LogUserActivity>();
 // builder.Configuration.GetSection("CloudinarySettings"): get the CloudinarySettings section from appsettings.json
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
+
+builder.Services.AddIdentityCore<AppUser>(opt =>
+{
+  opt.Password.RequireNonAlphanumeric = false; // password does not require non-alphanumeric characters
+  opt.User.RequireUniqueEmail = true; // email must be unique
+}).AddRoles<IdentityRole>() // covering role base authentication, using IdentityRole Type
+.AddEntityFrameworkStores<AppDbContext>(); // using entity framework to store user data
+
 // Looks for Authorization header, Checks Bearer <token>
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
@@ -44,6 +54,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
   };
 });
 
+builder.Services.AddAuthorizationBuilder()
+  .AddPolicy("RequiredAdminRole", policy => policy.RequireRole("Admin"))
+  .AddPolicy("ModeratePhotoRole", policy => policy.RequireRole("Admin", "Moderator"));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -52,7 +66,8 @@ var app = builder.Build();
 app.UseMiddleware<ExceptionMiddleware>();
 
 // CORS policy
-app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200", "https://localhost:4200"));
+// AllowCredentials: allow the client to send cookies to the API, and allow the API to set cookies in the client
+app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://localhost:4200", "https://localhost:4200"));
 
 // Authentication: who are you
 app.UseAuthentication(); // => create User object on the HttpContext, ControllerBase can use it
@@ -67,8 +82,9 @@ var services = scpoe.ServiceProvider;
 try
 {
   var context = services.GetRequiredService<AppDbContext>(); // get the database context
+  var userManager = services.GetRequiredService<UserManager<AppUser>>();
   await context.Database.MigrateAsync(); // apply any pending migrations
-  await Seed.SeedUsers(context); // since we used static in Seed.cs, we can call SeedUsers directly
+  await Seed.SeedUsers(userManager); // since we used static in Seed.cs, we can call SeedUsers directly
 }
 catch (Exception ex)
 {

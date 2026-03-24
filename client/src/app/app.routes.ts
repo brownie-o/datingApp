@@ -13,6 +13,8 @@ import { MemberPhotos } from '../features/members/member-photos/member-photos';
 import { MemberMessages } from '../features/members/member-messages/member-messages';
 import { memberResolver } from '../features/members/member-resolver';
 import { preventUnsavedChangesGuard } from '../core/guards/prevent-unsaved-changes-guard';
+import { Admin } from '../features/admin/admin';
+import { adminGuard } from '../core/guards/admin-guard';
 
 export const routes: Routes = [
   { path: "", component: Home },
@@ -24,12 +26,12 @@ export const routes: Routes = [
       { path: "members", component: MemberList },
       {
         path: "members/:id",
-        resolve: { member: memberResolver},
+        resolve: { member: memberResolver },
         runGuardsAndResolvers: "always", // to ensure resolver runs on every child route navigation
         component: MemberDetailed,
         children: [
           // Setting pathMatch: 'full' makes the redirect trigger only when the child URL is exactly empty (e.g., /members/123), leaving real child paths like /members/123/photos to resolve to their components.
-          { path: '', redirectTo: 'profile', pathMatch: 'full' }, 
+          { path: '', redirectTo: 'profile', pathMatch: 'full' },
           { path: 'profile', component: MemberProfile, title: 'Profile', canDeactivate: [preventUnsavedChangesGuard] },
           { path: 'photos', component: MemberPhotos, title: 'Photos' },
           { path: 'messages', component: MemberMessages, title: 'Messages' },
@@ -37,6 +39,7 @@ export const routes: Routes = [
       },
       { path: "lists", component: Lists },
       { path: "messages", component: Messages },
+      { path: "admin", component: Admin, canActivate: [adminGuard] },
     ]
   },
   { path: "errors", component: TestErrors }, //404 route
