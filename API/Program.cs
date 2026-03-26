@@ -5,6 +5,7 @@ using API.Helpers;
 using API.Interfaces;
 using API.Middleware;
 using API.Services;
+using API.SignalR;
 using Company.ClassLibrary1;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -13,11 +14,16 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// 1. Add services to the container. Registering services
 
+// AddControllers: add the controllers to the dependency injection container, so that they can be used in the application
 builder.Services.AddControllers();
+
+// AddDbContext: add the database context to the dependency injection container, so that it can be used in the application
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
+  // configuring how the DbContext connects to the database:
+  // use SQLite as the database provider, and get the connection string from the configuration (appsettings.json)
   opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
@@ -32,6 +38,8 @@ builder.Services.AddScoped<ILikesRepository, LikesRepository>();
 builder.Services.AddScoped<LogUserActivity>();
 // builder.Configuration.GetSection("CloudinarySettings"): get the CloudinarySettings section from appsettings.json
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<PresenceTracker>(); // AddSingleton: will not get destroyed until the application is stopped
 
 builder.Services.AddIdentityCore<AppUser>(opt =>
 {
@@ -52,6 +60,24 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     ValidateIssuer = false, // ValidateIssuer: does not accept tokens issued by certain issuer
     ValidateAudience = false // ValidateAudience: specify who is the audience of the token
   };
+
+// real time communication
+// hook into the JwtBearerEvents, get hold of the token from the query string, and if the request is for our hubs, then we will use that token to authenticate the user
+  options.Events = new JwtBearerEvents
+  {
+    // context: HttpContext
+    OnMessageReceived = context =>
+    {
+      var accessToken = context.Request.Query["access_token"];
+      
+      var path = context.HttpContext.Request.Path;
+      if(!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+      {
+        context.Token = accessToken;
+      }
+      return Task.CompletedTask;
+    }
+  };
 });
 
 builder.Services.AddAuthorizationBuilder()
@@ -60,7 +86,7 @@ builder.Services.AddAuthorizationBuilder()
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// 2. Configure the HTTP request pipeline. (middlewares that handle the HTTP requests)
 
 // error-handle middleware - must be placed at the top to catch errors from all other middlewares
 app.UseMiddleware<ExceptionMiddleware>();
@@ -75,6 +101,8 @@ app.UseAuthentication(); // => create User object on the HttpContext, Controller
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<PresenceHub>("hubs/presence"); // map the PresenceHub to the /hubs/presence endpoint
+app.MapHub<MessageHub>("hubs/messages");
 
 // seed data into datatbase
 using var scpoe = app.Services.CreateScope();
@@ -84,6 +112,7 @@ try
   var context = services.GetRequiredService<AppDbContext>(); // get the database context
   var userManager = services.GetRequiredService<UserManager<AppUser>>();
   await context.Database.MigrateAsync(); // apply any pending migrations
+  await context.Connections.ExecuteDeleteAsync(); // empty the connections table when the application starts
   await Seed.SeedUsers(userManager); // since we used static in Seed.cs, we can call SeedUsers directly
 }
 catch (Exception ex)
@@ -92,4 +121,5 @@ catch (Exception ex)
   logger.LogError(ex, "An error occurred during migration");
 }
 
+// 3. Run the application
 app.Run();

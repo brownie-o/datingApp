@@ -11,10 +11,13 @@ namespace API.Data;
 public class AppDbContext(DbContextOptions options) : IdentityDbContext<AppUser>(options)
 {
     // public DbSet<AppUser> Users { get; set; }
+    // Each DbSet = one table, define the rows in Entities(<Member>)
     public DbSet<Member> Members { get; set; }
     public DbSet<Photo> Photos { get; set; }
     public DbSet<MemberLike> Likes { get; set; }
     public DbSet<Message> Messages { get; set; }
+    public DbSet<Group> Groups { get; set; }
+    public DbSet<Connection> Connections { get; set; }
 
     // adjusting time to UTC time
     protected override void OnModelCreating(ModelBuilder modelBuilder)

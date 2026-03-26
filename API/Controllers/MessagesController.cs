@@ -17,7 +17,7 @@ public class MessagesController(IMessageRepository messageRepository, IMemberRep
     var sender = await memberRepository.GetMemberByIdAsync(User.GetMemberId());
     var recipient = await memberRepository.GetMemberByIdAsync(createMessageDto.RecipientId);
 
-    if (recipient == null || sender == null || sender.Id == recipient.Id) return BadRequest("Cannot send this message");
+    if (recipient == null || sender == null || sender.Id == createMessageDto.RecipientId) return BadRequest("Cannot send this message");
 
     var message = new Message
     {
