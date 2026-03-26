@@ -60,12 +60,12 @@ public class MemberRepository(AppDbContext context) : IMemberRepository
     // return a readonly list of photos for a specific member
   }
 
-  public async Task<bool> SaveAllAsync()
-  {
-    // SaveChangesAsync(): Saves all changes made in this context to the database.
-    return await context.SaveChangesAsync() > 0;
-    // The task result contains the number of state entries written to the database.
-  }
+  // public async Task<bool> SaveAllAsync()
+  // {
+  //   // SaveChangesAsync(): Saves all changes made in this context to the database.
+  //   return await context.SaveChangesAsync() > 0;
+  //   // The task result contains the number of state entries written to the database.
+  // }
 
   // use this method to save the same thing to the database
   public void Update(Member member)

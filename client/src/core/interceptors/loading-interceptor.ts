@@ -14,8 +14,8 @@ export const loadingInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   const invalidateCache = (urlPattern: string) => {
-    for(const key of cache.keys()){
-      if(key.includes(urlPattern)){
+    for (const key of cache.keys()) {
+      if (key.includes(urlPattern)) {
         cache.delete(key);
         console.log(`Cache invalidated for: ${key}`);
       }
@@ -24,12 +24,16 @@ export const loadingInterceptor: HttpInterceptorFn = (req, next) => {
 
   const cacheKey = generateCacheKey(req.url, req.params);
 
-  if(req.method.includes('POST') && req.url.includes('/likes')){
+  if (req.method.includes('POST') && req.url.includes('/likes')) {
     invalidateCache('/likes')
   }
 
-  if(req.method.includes('POST') && req.url.includes('/messages')){
+  if (req.method.includes('POST') && req.url.includes('/messages')) {
     invalidateCache('/messages')
+  }
+
+  if (req.method.includes('POST') && req.url.includes('/logout')) {
+    cache.clear()
   }
 
   // if the request url is cached, return the cached response

@@ -10,7 +10,6 @@ public interface IMemberRepository
 {
   // not returning anything, thus using void
   void Update(Member member);
-  Task<bool> SaveAllAsync(); // for saving changes
   Task<PaginatedResult<Member>> GetMembersAsync(MemberParams memberParams);
   Task<Member?> GetMemberByIdAsync(string id);
   Task<IReadOnlyList<Photo>> GetPhotosForMemberAsync(string memberId);

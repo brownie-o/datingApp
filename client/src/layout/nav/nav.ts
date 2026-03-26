@@ -21,6 +21,7 @@ export class Nav implements OnInit {
   protected creds: any = {}
   protected selecetedTheme = signal<string>(localStorage.getItem('theme') || 'light')
   protected themes = themes
+  protected loading = signal(false)
 
   ngOnInit(): void {
     document.documentElement.setAttribute("data-theme", this.selecetedTheme())
@@ -31,13 +32,20 @@ export class Nav implements OnInit {
     localStorage.setItem('theme', theme)
     document.documentElement.setAttribute("data-theme", theme)
     const elem = document.activeElement as HTMLElement
-    if(elem){
+    if (elem) {
       elem.blur()
     }
   }
 
+  handleSelectUserItem() {
+    const elem = document.activeElement as HTMLElement
+    if (elem) {
+      elem.blur()
+    }
+  }
 
   login() {
+    this.loading.set(true)
     this.accountService.login(this.creds).subscribe({ // should subscribe to the observable
       next: () => {
         this.router.navigateByUrl("/members")
@@ -46,6 +54,9 @@ export class Nav implements OnInit {
       },
       error: error => {
         this.toast.error(error.error)
+      },
+      complete: () => {
+        this.loading.set(false)
       }
     })
   }

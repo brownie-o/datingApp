@@ -12,7 +12,6 @@ public interface IMessageRepository
   Task<Message?> GetMessage(string messageId);
   Task<PaginatedResult<MessageDto>> GetMessagesForMember(MessageParams messageParams);
   Task<IReadOnlyList<MessageDto>> GetMessageThread(string currentMemberId, string recipientId);
-  Task<bool> SaveAllAsync();
 
   // Track the members of the group inside of the signalR hub
   void AddGroup(Group group);

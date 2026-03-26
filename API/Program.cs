@@ -32,6 +32,7 @@ builder.Services.AddCors();
 // “ When someone asks for ITokenService, create a TokenService instance using this lifetime rule. ”
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IPhotoService, PhotoService>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddScoped<ILikesRepository, LikesRepository>();
@@ -61,17 +62,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     ValidateAudience = false // ValidateAudience: specify who is the audience of the token
   };
 
-// real time communication
-// hook into the JwtBearerEvents, get hold of the token from the query string, and if the request is for our hubs, then we will use that token to authenticate the user
+  // real time communication
+  // hook into the JwtBearerEvents, get hold of the token from the query string, and if the request is for our hubs, then we will use that token to authenticate the user
   options.Events = new JwtBearerEvents
   {
     // context: HttpContext
     OnMessageReceived = context =>
     {
       var accessToken = context.Request.Query["access_token"];
-      
+
       var path = context.HttpContext.Request.Path;
-      if(!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+      if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
       {
         context.Token = accessToken;
       }
