@@ -38,7 +38,8 @@ namespace API.Controllers
         [HttpGet("{id}/photos")]
         public async Task<ActionResult<IReadOnlyList<Photo>>> GetPhotosForMember(string id)
         {
-            return Ok(await uow.MemberRepository.GetPhotosForMemberAsync(id));
+            var isCurrentUser = id == User.GetMemberId();
+            return Ok(await uow.MemberRepository.GetPhotosForMemberAsync(id, isCurrentUser));
         }
 
         // Task<ActionResult>: not returning any specific data, just an HTTP response
@@ -93,11 +94,11 @@ namespace API.Controllers
             };
 
             // if the user has no photos, make this the main photo
-            if (member.ImageUrl == null)
-            {
-                member.ImageUrl = photo.Url;
-                member.User.ImageUrl = photo.Url;
-            }
+            // if (member.ImageUrl == null)
+            // {
+            //     member.ImageUrl = photo.Url;
+            //     member.User.ImageUrl = photo.Url;
+            // }
 
             member.Photos.Add(photo);
 

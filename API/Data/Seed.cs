@@ -63,6 +63,7 @@ public class Seed
       {
         Url = member.ImageUrl!,
         MemberId = member.Id,
+        IsApproved = true,
       });
 
       // track the user entity to be added to the database

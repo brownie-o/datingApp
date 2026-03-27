@@ -18,7 +18,7 @@ public class MemberRepository(AppDbContext context) : IMemberRepository
   {
     // Include: eager loading related entities
     // will include the User object & photos when getting the member for update
-    return await context.Members.Include(x => x.User).Include(x => x.Photos).SingleOrDefaultAsync(x => x.Id == id);
+    return await context.Members.Include(x => x.User).Include(x => x.Photos).IgnoreQueryFilters().SingleOrDefaultAsync(x => x.Id == id);
   }
 
   public async Task<PaginatedResult<Member>> GetMembersAsync(MemberParams memberParams)
@@ -54,9 +54,12 @@ public class MemberRepository(AppDbContext context) : IMemberRepository
     //   .ToListAsync();
   }
 
-  public async Task<IReadOnlyList<Photo>> GetPhotosForMemberAsync(string memberId)
+  public async Task<IReadOnlyList<Photo>> GetPhotosForMemberAsync(string memberId, bool isCurrentUser)
   {
-    return await context.Members.Where(x => x.Id == memberId).SelectMany(x => x.Photos).ToListAsync();
+    var query = context.Members.Where(x => x.Id == memberId).SelectMany(x => x.Photos);
+    if (isCurrentUser) query = query.IgnoreQueryFilters();
+
+    return await query.ToListAsync();
     // return a readonly list of photos for a specific member
   }
 

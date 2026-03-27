@@ -12,7 +12,7 @@ public interface IMemberRepository
   void Update(Member member);
   Task<PaginatedResult<Member>> GetMembersAsync(MemberParams memberParams);
   Task<Member?> GetMemberByIdAsync(string id);
-  Task<IReadOnlyList<Photo>> GetPhotosForMemberAsync(string memberId);
+  Task<IReadOnlyList<Photo>> GetPhotosForMemberAsync(string memberId, bool isCurentUser);
 
   // get the member to update
   Task<Member?> GetMemberForUpdate(string id);
