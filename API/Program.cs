@@ -24,7 +24,7 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 {
   // configuring how the DbContext connects to the database:
   // use SQLite as the database provider, and get the connection string from the configuration (appsettings.json)
-  opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
+  opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
 // to solve CORS issues
@@ -101,9 +101,13 @@ app.UseAuthentication(); // => create User object on the HttpContext, Controller
 // Authorization: are they allowed
 app.UseAuthorization();
 
+app.UseDefaultFiles(); // look for index.html in wwwroot folder
+app.UseStaticFiles(); // serve static files from wwwroot folder, so that we can access the Angular app
+
 app.MapControllers();
 app.MapHub<PresenceHub>("hubs/presence"); // map the PresenceHub to the /hubs/presence endpoint
 app.MapHub<MessageHub>("hubs/messages");
+app.MapFallbackToController("Index", "Fallback"); // if no other endpoints match, fallback to the Index action of the Fallback controller
 
 // seed data into datatbase
 using var scpoe = app.Services.CreateScope();
