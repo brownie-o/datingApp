@@ -35,7 +35,8 @@ public class TokenService(IConfiguration config, UserManager<AppUser> userManage
     var tokenDescriptor = new SecurityTokenDescriptor
     {
       Subject = new ClaimsIdentity(claims),
-      Expires = DateTime.UtcNow.AddMinutes(7),
+      // Expires = DateTime.UtcNow.AddMinutes(7), // For production, set shorter expiration time and use refresh tokens to get new access tokens. 
+      Expires = DateTime.UtcNow.AddDays(15), // For development, set longer expiration time to avoid having to log in frequently and use free SQL server
       SigningCredentials = creds
     };
 

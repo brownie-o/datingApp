@@ -60,7 +60,8 @@ export class AccountService {
           this.logout()
         }
       })
-    }, 5 * 60 * 1000) // every 5 minutes
+    // }, 5 * 60 * 1000) // every 5 minutes
+    }, 14 * 24 * 60 * 60 * 1000) // every 14 days for dev mode
   }
 
   setCurrentUser(user: User) {

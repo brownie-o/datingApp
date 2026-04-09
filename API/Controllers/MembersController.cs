@@ -91,6 +91,7 @@ namespace API.Controllers
                 Url = result.SecureUrl.AbsoluteUri,
                 PublicId = result.PublicId,
                 MemberId = User.GetMemberId()
+                //IsApproved = true // auto approve photos uploaded by users
             };
 
             // if the user has no photos, make this the main photo
