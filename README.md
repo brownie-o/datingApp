@@ -246,7 +246,6 @@ The production build will be output to `dist/` directory.
 | GET | `/api/messages` | Get messages |
 | POST | `/api/admin/approve-photo/{photoId}` | Approve photo (admin) |
 
-For detailed API documentation, refer to the Swagger UI at `/swagger` (when enabled)
 
 ## 🔐 Security Features
 
@@ -268,4 +267,5 @@ For detailed API documentation, refer to the Swagger UI at `/swagger` (when enab
 ---
 
 **Last Updated:** April 2026
+
 **Live Application:** https://dating-2026.azurewebsites.net/
