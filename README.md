@@ -211,10 +211,10 @@ The production build will be output to `dist/` directory.
    # Publish backend
    dotnet publish -c Release
    ```
-   # Continuous Integration to Azure App Service
-  - Link your GitHub with Web App Deployment Source
-  - Select Add a workflow for Workflow option
-  - Select User-assinged identity for Authentication type
+   **Continuous Integration to Azure App Service**
+    - Link your GitHub with Web App Deployment Source
+    - Select Add a workflow for Workflow option
+    - Select User-assinged identity for Authentication type
 
 3. **Deploy Frontend**
    ```bash
