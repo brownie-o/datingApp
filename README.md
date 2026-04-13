@@ -28,8 +28,7 @@ A full-stack web application built with ASP.NET Core and Angular, enabling users
 
 - **Admin Dashboard**
   - User moderation tools
-  - Photo approval workflow
-  - System administration
+  - Photo approval
 
 - **Real-Time Presence**
   - User online/offline status
@@ -52,7 +51,6 @@ A full-stack web application built with ASP.NET Core and Angular, enabling users
 - **Language:** TypeScript
 - **Styling:** CSS, DaisyUi
 - **Package Manager:** npm
-- **Testing:** Vitest
 
 ### Cloud & Deployment
 - **Hosting:** Azure App Service
@@ -67,23 +65,23 @@ datingApp/
 │   ├── Data/                     # Database context & repositories
 │   ├── DTOs/                     # Data transfer objects
 │   ├── Entities/                 # Domain models
-│   ├── Interfaces/               # Service contracts
-│   ├── Services/                 # Business logic
-│   ├── SignalR/                  # Real-time hubs
-│   ├── Middleware/               # Custom middleware
 │   ├── Extensions/               # Extension methods
 │   ├── Helpers/                  # Utility classes
+│   ├── Interfaces/               # Service contracts
+│   ├── Middleware/               # Custom middleware
+│   ├── Services/                 # Business logic
+│   ├── SignalR/                  # Real-time hubs
 │   └── Program.cs                # App configuration
 │
 ├── client/                       # Angular frontend
 │   ├── src/
 │   │   ├── app/                  # Angular components & modules
 │   │   ├── core/                 # Core services
+│   │   └── environments/         # Environment configurations
 │   │   ├── features/             # Feature modules
 │   │   ├── layout/               # Layout components
 │   │   ├── shared/               # Shared components & services
 │   │   ├── types/                # TypeScript type definitions
-│   │   └── environments/         # Environment configurations
 │   └── package.json              # Frontend dependencies
 │
 └── datingApp.sln                 # Solution file
@@ -104,7 +102,7 @@ datingApp/
 #### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/datingApp.git
+git clone https://github.com/brownie-o/datingApp.git
 cd datingApp
 ```
 
@@ -124,7 +122,7 @@ dotnet ef database update
 dotnet run
 ```
 
-The API will be available at `https://localhost:5001` (or configured port in `launchSettings.json`)
+The API will be available at `https://localhost:5001` (configured port in `launchSettings.json`)
 
 #### 3. Frontend Setup (Angular)
 
@@ -192,8 +190,6 @@ cd client
 ng build
 ```
 
-The production build will be output to `dist/` directory.
-
 ## 🌐 Deployment on Azure
 
 ### Prerequisites
@@ -212,15 +208,35 @@ The production build will be output to `dist/` directory.
    dotnet publish -c Release
    ```
    **Continuous Integration to Azure App Service**
-    - Link your GitHub with Web App Deployment Source
-    - Select Add a workflow for Workflow option
-    - Select User-assinged identity for Authentication type
+    - Link Web App Deployment Source with GitHub
+    - Select "Add a workflow" for Workflow option
+    - Select "User-assinged identity" for Authentication type
 
 3. **Deploy Frontend**
    ```bash
    # Build Angular app
    ng build
-   
+   ```
+
+   **Set Auto Deploy**
+   - Update .githut>workflows>main_WebAppName.yaml
+   ```yaml
+   steps: 
+	- uses: actions/checkout@v4
+	
+	- name: Set up node.jobs
+		uses: actions/setup-node@v4
+		with: 
+			node-version: '22'
+		
+	- name: Install Angular cli
+		run: npm install -g @angular/cli@20
+		
+	- name: Install deps and build Angular app
+		run: |
+			cd client
+			npm install
+			ng build
    ```
 
 4. **Configure Settings on Azure**
@@ -250,9 +266,9 @@ The production build will be output to `dist/` directory.
 ## 🔐 Security Features
 
 - JWT-based authentication
-- HTTPS enforced in production
-- SQL injection prevention via parameterized queries
-- Role-based authorization
+- Role-based authorization (Admin / Moderator policies)
+- Endpoint protection via [Authorize] on controllers and SignalR hubs
+- Data access through EF Core LINQ queries (no raw SQL usage in repositories)
 - CORS configuration
 - Exception handling middleware
 
